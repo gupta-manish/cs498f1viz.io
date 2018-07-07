@@ -3,19 +3,22 @@ var results;
 var drivers;
 var driverStandings;
 
-var xmlReq = new XMLHttpRequest();
-xmlReq.onload = racesListener;
-xmlReq.open("get", "./f1db_json/races.json", true);
-xmlReq.send();
-xmlReq.onload = resultsListener;
-xmlReq.open("get", "./f1db_json/results.json", true);
-xmlReq.send();
-xmlReq.onload = driversListener;
-xmlReq.open("get", "./f1db_json/drivers.json", true);
-xmlReq.send();
-xmlReq.onload = driverStandingsListener;
-xmlReq.open("get", "./f1db_json/driverStandings.json", true);
-xmlReq.send();
+var racesReq = new XMLHttpRequest();
+racesReq.onload = racesListener;
+racesReq.open("get", "./f1db_json/races.json", true);
+racesReq.send();
+var resultsReq = new XMLHttpRequest();
+results.onload = resultsListener;
+resultsReq.open("get", "./f1db_json/results.json", true);
+resultsReq.send();
+var driversReq = new XMLHttpRequest();
+driversReq.onload = driversListener;
+driversReq.open("get", "./f1db_json/drivers.json", true);
+driversReq.send();
+var driverStandingsReq = new XMLHttpRequest();
+driverStandingsReq.onload = driverStandingsListener;
+driverStandingsReq.open("get", "./f1db_json/driverStandings.json", true);
+driverStandingsReq.send();
 
 function racesListener(e) {
     races = JSON.parse(this.responseText);
