@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>JS Bin</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.js"></script>
+	<style> 
+		.barChart rect {fill: steelblue } 
+		#tooltip {
+			opacity :0;
+			position :absolute;
+			text-align: center;
+			width: 60px;
+			height: 40px;
+			background: white;
+			border: 0px
+		}
+		.lineChart rect {fill: steelblue }
+	</style>
+</head>
+<body>
+	<p> List of numbers in data: <span id="data"/></p>
+	<svg class="lineChart">
+	</svg>
+	<div id="tooltip"></div>
+	<script>
+		getIndexArray = function(length){
+			rA = [];
+			for(i=0;i<length;i++){
+				rA.push(i);
+			}
+			return rA;
+		}
+		
+		generateToolTip = function(d,i){
+			d3.select("#tooltip").style("opacity",1)
+						 .style("left",d3.event.pageX+"px")
+						 .style("top",d3.event.pageY+"px")
+						 .html("Item "+i+" is "+d);
+		};
+		removeToolTip = function(d){
+			d3.select("#tooltip").style("opacity",0)
+							.style("left","0px")
+						 .style("top","0px")
+						 .html("");
+		};
+		var data1=[0,10,15,25,35,35,40,50]
+		var data2=[0,5,20,30,30,40,45,45]
+		document.getElementById("data").innerHTML=data;
+		barWidth = 50;
+		heightUnit = 5;
+		dataMax = Math.max(...data1);
+		width = barWidth*data1.length;
+		height = heightUnit*dataMax;
+		margin = 20;
+		var x = d3.scaleLinear().domain([0,data1.length]).range([0,width]);
+		var y = d3.scaleLinear().domain([0,dataMax]).range([0,-height]);
+		
+
+		var lineFunction = function(data,di){
+			var line = d3.line()
+								 .x(function(d,i) {return x(di-1+i);})
+								 .y(function(d) { return -heightUnit*d;})
+			if(di==0){
+			}
+			else{
+				var ret = line([data[di-1],data[di]]);
+				console.log(ret)
+				return ret;
+			}
+		}
+		
+		var svg = d3.select(".lineChart")
+			.attr("width",width+2*margin)
+			.attr("height",height+2*margin)
+			.append("g")
+			.attr("transform","translate("+margin+","+(margin+height)+")")
+			.call(d3.axisLeft(y))
+			.append("g")
+			.call(d3.axisBottom(x));
+
+
+		for(var di = 1; di<data1.length; di++)
+		{
+			var path = svg
+				.append("path")
+				.attr("d",lineFunction(data1,di))
+				.attr("stroke", "blue")
+				.attr("stroke-width", 2)
+				.attr("fill", "none");
+			var totalLength = path.node().getTotalLength();
+			path.attr("stroke-dasharray", totalLength)
+				.attr("stroke-dashoffset", totalLength)
+				.transition()
+				.duration(1000)
+				.delay(di*1000)
+				.ease(d3.easeLinear)
+				.attr("stroke-dashoffset", 0);
+			svg.append("circle")
+				.attr("cx",x(di))
+				.attr("cy",-heightUnit*data1[di])
+				.attr("r",3)
+				.attr("stroke","black")
+				.attr("stroke-width",1)
+				.attr("fill","red")
+				.attr("stroke-opacity",0)
+				.attr("fill-opacity",0)
+				.transition()
+				.duration(1)
+				.delay((di+1)*1000)
+				.attr("stroke-opacity",1)
+				.attr("fill-opacity",1);
+		}
+
+
+		for(var di = 1; di<data2.length; di++)
+		{
+			var path = svg
+				.append("path")
+				.attr("d",lineFunction(data2,di))
+				.attr("stroke", "blue")
+				.attr("stroke-width", 2)
+				.attr("fill", "none");
+			var totalLength = path.node().getTotalLength();
+			path.attr("stroke-dasharray", totalLength)
+				.attr("stroke-dashoffset", totalLength)
+				.transition()
+				.duration(1000)
+				.delay(di*1000)
+				.ease(d3.easeLinear)
+				.attr("stroke-dashoffset", 0);
+			svg.append("circle")
+				.attr("cx",x(di))
+				.attr("cy",-heightUnit*data2[di])
+				.attr("r",3)
+				.attr("stroke","black")
+				.attr("stroke-width",1)
+				.attr("fill","red")
+				.attr("stroke-opacity",0)
+				.attr("fill-opacity",0)
+				.transition()
+				.duration(1)
+				.delay((di+1)*1000)
+				.attr("stroke-opacity",1)
+				.attr("fill-opacity",1);
+		}
+																								
+	</script>
+</body>
+</html>
