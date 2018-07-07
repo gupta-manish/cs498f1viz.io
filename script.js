@@ -8,7 +8,7 @@ racesReq.onload = racesListener;
 racesReq.open("get", "./f1db_json/races.json", true);
 racesReq.send();
 var resultsReq = new XMLHttpRequest();
-results.onload = resultsListener;
+resultsReq.onload = resultsListener;
 resultsReq.open("get", "./f1db_json/results.json", true);
 resultsReq.send();
 var driversReq = new XMLHttpRequest();
