@@ -65,7 +65,8 @@ var getAllDrivers = function(year)
 			}
 		}
 	}
-	return driverSet;
+	driverArray = Array.from(driverSet);
+	return driverArray;
 }
 
 var getAllRaces = function(year)

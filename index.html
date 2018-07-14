@@ -85,6 +85,14 @@
 <div class="tabcontent">
   <h3 id="contentheading"></h3>
   <svg class="lineChart"></svg>
+  <div class="drivers" style="position: relative; display: inline-block; left: 0px; top: -35px;">
+	  <div class="driverList"></div>
+	  <div class="driverListControls">	
+	  	<button>Select All</button>
+	  	<button>Remove All</button>
+	  	<button>Redraw</button>
+	  </div>
+  </div>
   <div id="tooltip"></div>
 </div>
 <script>
@@ -102,17 +110,24 @@ var openYear = function(evt, year) {
     document.getElementById("contentheading").innerHTML=year;
     evt.currentTarget.className += " active";
     var svg = d3.select(".lineChart");
+    var driverList = d3.select(".driverList");
 	svg.selectAll("*").remove();
-	var driverSet = getAllDrivers(year);
+	driverList.selectAll("*").remove();
+	var driverArray = getAllDrivers(year);
 	var raceArray = getAllRaces(year);
 	var raceTickValues = [0];
 	var maxLength = raceArray.length+1;
 	var maxPoints = 0;
-	for(let driver of driverSet)
-	{
+	driverArray.forEach(function(driver,i){
 		driver.pointArray = getDriverPointsArray(driver,year,raceArray);
 		maxPoints = Math.max(maxPoints,driver.pointArray[driver.pointArray.length-1]);
-	}
+	});
+	driverArray.sort(function(driver1,driver2){
+		return driver2.pointArray[driver2.pointArray.length-1] - driver1.pointArray[driver1.pointArray.length-1];
+	});
+	driverArray.forEach(function(driver,i){
+		driver.position = i+1;
+	});
 	width = 750;
 	height = 500;
 	dataMax = maxPoints;
@@ -136,12 +151,13 @@ var openYear = function(evt, year) {
 	}
 	var generateToolTip = function(race,points){
 		var htmlString = "";
-		for(let driver of driverSet)
-		{
+		var n = 0;
+		driverArray.forEach(function(driver,i){
 			if(driver.pointArray[race] == points){
 				htmlString = htmlString + "<p>" + driver.forename + " " + driver.surname + "</p>";
+				n = n+1;
 			}
-		}
+		});
 		d3.select("#tooltip").style("opacity",0.75)
 			.style("left",(d3.event.pageX+5) +"px")
 			.style("top",(d3.event.pageY+5) +"px")
@@ -156,6 +172,21 @@ var openYear = function(evt, year) {
               .style("left","0px")
              .style("top","0px")
              .html("");
+    };
+    var getLineColor = function(position){
+    	switch(position)
+    	{
+    		case 1: return "gold";
+    		case 2: return "silver";
+    		case 3: return "brown";
+    		default:return "blue";
+    	}
+    };
+    var getLineOpacity = function(position, noOfDrivers){
+    	if(position < 4)
+    		return 1;
+    	else
+    		return ((noOfDrivers-position)+0.2*(position-4))/(noOfDrivers-4);
     };
 	var svg = d3.select(".lineChart")
 				.attr("width",width+2*margin)
@@ -181,14 +212,14 @@ var openYear = function(evt, year) {
 		.call(d3.axisLeft(y).ticks(dataMax/20))
 		.append("g")
 		.call(d3.axisBottom(x).ticks(maxLength));
-	for(let driver of driverSet)
-	{
+	driverArray.forEach(function(driver,i){
 		for (var di = 1; di < driver.pointArray.length; di++) {
 			(function(di){
 				var path = svg
 					.append("path")
 					.attr("d",lineFunction(driver.pointArray,di))
-					.attr("stroke", "blue")
+					.attr("stroke", getLineColor(driver.position))
+					.attr("opacity", getLineOpacity(driver.position, driverArray.length))
 					.attr("stroke-width", 2)
 					.attr("fill", "none");
 				var totalLength = path.node().getTotalLength();
@@ -216,9 +247,24 @@ var openYear = function(evt, year) {
 					.attr("stroke-opacity",1)
 					.attr("fill-opacity",1);
 				svg.append("text")
-				})(di);
+			})(di);
 		}
-	}
+	});
+	driverList.append("ol")
+			  .selectAll("li")
+			  .data(driverArray)
+			  .enter()
+			  .append("li")
+			  .append("div")
+			  .style("color",function(driver,i){ return getLineColor(driver.position);})
+			  .style("opacity",function(driver,i){ return getLineOpacity(driver.position,driverArray.length)})
+			  .append("label")
+			  .attr("for",function(driver,i){return driver.driverId;})
+			  .text(function(driver,i){ return driver.forename + " " + driver.surname})
+			  .append("input")
+			  .attr("type","checkbox")
+			  .attr("id",function(driver,i){return driver.driverId;});
+
 }
 </script>
 </body>
