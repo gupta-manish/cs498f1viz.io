@@ -7,13 +7,42 @@
 	<style type="text/css">
 	body {font-family: Arial;}
 		/* Style the tab */
+
+		.tabgroup {
+		    overflow: hidden;
+		    border: 1px solid #ccc;
+		    background-color: #f1f1f1;
+		}
+
+		.tabgroup button {
+		    background-color: inherit;
+		    float: left;
+		    border: none;
+		    outline: none;
+		    cursor: pointer;
+		    padding: 7px 8px;
+		    transition: 0.3s;
+		    font-size: 12px;
+		}
+
+		/* Style the buttons inside the tab */
+
+		/* Change background color of buttons on hover */
+		.tabgroup button:hover {
+		    background-color: #ddd;
+		}
+
+		/* Create an active/current tablink class */
+		.tabgroup button.active {
+		    background-color: #ccc;
+		}
+
 		.tab {
 		    overflow: hidden;
 		    border: 1px solid #ccc;
 		    background-color: #f1f1f1;
 		}
 
-		/* Style the buttons inside the tab */
 		.tab button {
 		    background-color: inherit;
 		    float: left;
@@ -24,6 +53,8 @@
 		    transition: 0.3s;
 		    font-size: 12px;
 		}
+
+		/* Style the buttons inside the tab */
 
 		/* Change background color of buttons on hover */
 		.tab button:hover {
@@ -80,39 +111,107 @@
 </head>
 <body>
 <h1> CS-498 Formula 1 Visualization </h1>
-<div class="tab">
+<div class="tabgroup">
+	<button onclick="prevPage()">Prev</button>
+	<button onclick="nextPage()">Next</button>
 </div>
+	<div class="tab">
+	</div>
 <div class="tabcontent">
   <h3 id="contentheading"></h3>
+  <div id="essay">
+  </div>
   <svg class="lineChart"></svg>
   <div class="drivers" style="position: relative; display: inline-block; left: 0px; top: -35px;">
 	  <div class="driverList"></div>
 	  <div class="driverListControls">	
-	  	<button>Select All</button>
-	  	<button>Remove All</button>
-	  	<button>Redraw</button>
+	  	<button onclick="checkAllBoxes()">Select All</button>
+	  	<button onclick="unCheckAllBoxes()">Remove All</button>
+	  	<button onclick="openWithSelectedDrivers(event)">Play</button>
+	  	<button onclick="openYear(event)">Reset</button>
 	  </div>
+  </div>
+  <div class="races" style="position: relative; display: inline-block; left: 50px; top: -150px;">
+  	<div class="raceList"></div>
   </div>
   <div id="tooltip"></div>
 </div>
 <script>
-var innerHTMLString = "";
+var innerHTMLString = "<button class=\"tablinks\" id=\"essayButton\" onclick=\"openEssay(event)\">Essay</button>";
 for (var i = 68; i > 0; i--) {
-	innerHTMLString = innerHTMLString + "<button class=\"tablinks\" onclick=\"openYear(event, '"+(2017-i+1)+"')\">"+(2017-i+1)+"</button>";
+	innerHTMLString = innerHTMLString + "<button class=\"tablinks\" id=\""+(2017-i+1)+"Button\" onclick=\"openYear(event,'"+(2017-i+1)+"')\">"+(2017-i+1)+"</button>";
 }
 $(".tab").append(innerHTMLString);
-var openYear = function(evt, year) {
+var championshipYear = 0;
+var checkAllBoxes = function(){
+	var checkBoxes = Array.from(document.getElementsByTagName("input"));
+	checkBoxes.forEach(function(checkBox,i){
+		checkBox.checked = true
+	});
+}
+var unCheckAllBoxes = function(){
+	var checkBoxes = Array.from(document.getElementsByTagName("input"));
+	checkBoxes.forEach(function(checkBox,i){
+		checkBox.checked = false
+	});
+}
+var prevPage = function(){
+	if(championshipYear != 0)
+	{
+		if(championshipYear == 1950)
+			document.getElementById("essayButton").click();
+		else
+			document.getElementById((championshipYear-1)+"Button").click();
+	}
+}
+var nextPage = function(){
+	if(championshipYear != 2017)
+	{
+		if(championshipYear == 0)
+			document.getElementById(1950+"Button").click();
+		else
+			document.getElementById((championshipYear+1)+"Button").click();
+	}
+}
+var openEssay = function(){
+	var ti, tablinks;
+    tablinks = document.getElementsByClassName("tablinks");
+    for (ti = 0; ti < tablinks.length; ti++) {
+        tablinks[ti].className = tablinks[ti].className.replace(" active", "");
+    }
+    championshipYear = 0;
+    document.getElementById("contentheading").innerHTML="Essay";
+    essay = document.getElementById("essay");
+    essay.hidden = false;
+    var svg = d3.select(".lineChart");
+    var driverList = d3.select(".driverList");
+    var raceList = d3.select(".raceList");
+	svg.selectAll("*").remove();
+	driverList.selectAll("*").remove();
+	raceList.selectAll("*").remove();
+	driverListControls = document.getElementsByClassName("driverListControls");
+	driverListControls[0].hidden = true;
+}
+openEssay();
+var openYear = function(evt, year = championshipYear.toString()) {
+	championshipYear = parseInt(year);
     var ti, tablinks;
     tablinks = document.getElementsByClassName("tablinks");
     for (ti = 0; ti < tablinks.length; ti++) {
         tablinks[ti].className = tablinks[ti].className.replace(" active", "");
     }
     document.getElementById("contentheading").innerHTML=year;
+    essay = document.getElementById("essay");
+    essay.hidden = true;
     evt.currentTarget.className += " active";
     var svg = d3.select(".lineChart");
     var driverList = d3.select(".driverList");
+    var raceList = d3.select(".raceList");
 	svg.selectAll("*").remove();
 	driverList.selectAll("*").remove();
+	raceList.selectAll("*").remove();
+	driverListControls = document.getElementsByClassName("driverListControls");
+	driverListControls[0].hidden = false;
 	var driverArray = getAllDrivers(year);
 	var raceArray = getAllRaces(year);
 	var raceTickValues = [0];
@@ -121,6 +220,11 @@ var openYear = function(evt, year) {
 	driverArray.forEach(function(driver,i){
 		driver.pointArray = getDriverPointsArray(driver,year,raceArray);
 		maxPoints = Math.max(maxPoints,driver.pointArray[driver.pointArray.length-1]);
+		driver.isLeaderArray = [];
+		driver.isLeaderArray.push(0);
+		raceArray.forEach(function(race,i){
+			driver.isLeaderArray.push(0);
+		});
 	});
 	driverArray.sort(function(driver1,driver2){
 		return driver2.pointArray[driver2.pointArray.length-1] - driver1.pointArray[driver1.pointArray.length-1];
@@ -128,6 +232,19 @@ var openYear = function(evt, year) {
 	driverArray.forEach(function(driver,i){
 		driver.position = i+1;
 	});
+	raceArray.forEach(function(race,i){
+		var championshipLeader;
+		var mx = 0;
+		driverArray.forEach(function(driver,j){
+			if(mx < driver.pointArray[i+1])
+			{
+				mx = driver.pointArray[i+1];
+				championshipLeader = j;
+			}
+		});
+		driverArray[championshipLeader].isLeaderArray[i+1] = 1;
+	});
+	driverArray = driverArray.slice(0,Math.min(25,driverArray.length));
 	width = 750;
 	height = 500;
 	dataMax = maxPoints;
@@ -206,10 +323,10 @@ var openYear = function(evt, year) {
 		.attr("font-size", 12)
 		.attr("dy", ".75em")
 		.attr("transform", "rotate(-90)")
-		.text("Points");
+		.text("Total Championship Points");
 	svg = svg.append("g")
 		.attr("transform","translate("+margin+","+(margin+height)+")")
-		.call(d3.axisLeft(y).ticks(dataMax/20))
+		.call(d3.axisLeft(y).ticks(10))
 		.append("g")
 		.call(d3.axisBottom(x).ticks(maxLength));
 	driverArray.forEach(function(driver,i){
@@ -235,6 +352,7 @@ var openYear = function(evt, year) {
 					.attr("cy",-heightUnit*driver.pointArray[di])
 					.attr("r",3)
 					.attr("stroke","black")
+					.attr("opacity", getLineOpacity(driver.position, driverArray.length))
 					.attr("stroke-width",1)
 					.attr("fill","red")
 					.on("mouseover",function(){generateToolTip(di,driver.pointArray[di]);})
@@ -246,7 +364,44 @@ var openYear = function(evt, year) {
 					.delay((di+1)*timeUnit)
 					.attr("stroke-opacity",1)
 					.attr("fill-opacity",1);
-				svg.append("text")
+				if(driver.isLeaderArray[di] && !driver.isLeaderArray[di-1]){
+					stext = svg.append("text")
+						.attr("x",x(di)-5)
+						.attr("y",-heightUnit*driver.pointArray[di]-100)
+						.attr("text-anchor", "end")
+						.attr("fill", "red")
+						.attr("font-size",11)
+						.attr("opacity",1)
+						.attr("dy", ".75em")		
+					stext.append("tspan")
+						.attr("x",x(di))
+						.text("Championship Leader:");
+					stext.append("tspan")
+						.attr("x",x(di))
+						.attr("dy","0.9em")
+						.text(driver.forename +" " +driver.surname);
+					stext.attr("stroke-opacity",0)
+						.attr("fill-opacity",0)
+						.transition()
+						.duration(1)
+						.delay((di+1)*timeUnit)
+						.attr("stroke-opacity",1)
+						.attr("fill-opacity",1);
+					arrow = svg.append("rect")
+						.attr("width",2)
+						.attr("stroke-wdith",0)
+						.attr("x",x(di))
+						.attr("y",-heightUnit*driver.pointArray[di]-90)
+						.attr("height",90);
+					arrow.attr("stroke-opacity",0)
+						.attr("fill-opacity",0)
+						.transition()
+						.duration(1)
+						.delay((di+1)*timeUnit)
+						.attr("stroke-opacity",1)
+						.attr("fill-opacity",1);
+				}
+
 			})(di);
 		}
 	});
@@ -264,7 +419,170 @@ var openYear = function(evt, year) {
 			  .append("input")
 			  .attr("type","checkbox")
 			  .attr("id",function(driver,i){return driver.driverId;});
+	raceList.append("ol")
+		  .selectAll("li")
+		  .data(raceArray)
+		  .enter()
+		  .append("li")
+		  .html(function(race,i){return race.name;})
 
+}
+var openWithSelectedDrivers = function(evt) {
+	var year = championshipYear;
+    var svg = d3.select(".lineChart");
+    var driverList = d3.select(".driverList");
+	svg.selectAll("*").remove();
+	var driverArray = getAllDrivers(year);
+	var raceArray = getAllRaces(year);
+	var checkBoxes = Array.from(document.getElementsByTagName("input"));
+	var raceTickValues = [0];
+	var maxLength = raceArray.length+1;
+	var maxPoints = 0;
+	driverArray.forEach(function(driver,i){
+		driver.pointArray = getDriverPointsArray(driver,year,raceArray);
+		maxPoints = Math.max(maxPoints,driver.pointArray[driver.pointArray.length-1]);
+	});
+	driverArray.sort(function(driver1,driver2){
+		return driver2.pointArray[driver2.pointArray.length-1] - driver1.pointArray[driver1.pointArray.length-1];
+	});
+	driverArray.forEach(function(driver,i){
+		driver.position = i+1;
+	});
+	driverArray = driverArray.slice(0,Math.min(25,driverArray.length));
+	checkBoxes.forEach(function(checkBox,i){
+		driverArray.forEach(function(driver,j){
+			if(driver.driverId == checkBox.id && checkBox.checked == true)
+				driver.ticked = true;
+			if(driver.driverId == checkBox.id && checkBox.checked == false)
+				driver.ticked = false;
+		});
+	});
+	width = 750;
+	height = 500;
+	dataMax = maxPoints;
+	timeUnit = 500;
+	barWidth = width/maxLength;
+	heightUnit = height/dataMax;
+	margin = 40;
+	var x = d3.scalePoint().domain(getIndexArray(maxLength)).range([0,width]);
+	var y = d3.scaleLinear().domain([0,dataMax]).range([0,-height]);
+	var lineFunction = function(data,di){
+		var line = d3.line()
+					.x(function(d,i) {return x(di-1+i);})
+					.y(function(d) { return -heightUnit*d;});
+		if(di==0){
+		}
+		else{
+			var ret = line([data[di-1],data[di]]);
+			console.log(ret)
+			return ret;
+		}
+	}
+	var generateToolTip = function(race,points){
+		var htmlString = "";
+		var n = 0;
+		driverArray.forEach(function(driver,i){
+			if(driver.pointArray[race] == points){
+				htmlString = htmlString + "<p>" + driver.forename + " " + driver.surname + "</p>";
+				n = n+1;
+			}
+		});
+		d3.select("#tooltip").style("opacity",0.75)
+			.style("left",(d3.event.pageX+5) +"px")
+			.style("top",(d3.event.pageY+5) +"px")
+			.html(
+				htmlString +
+				"<p> Points = " + points + "</p>" +
+				"<p>" + raceArray[race-1].name + "</p>"
+			);
+    };
+    var removeToolTip = function(){
+      d3.select("#tooltip").style("opacity",0)
+              .style("left","0px")
+             .style("top","0px")
+             .html("");
+    };
+    var getLineColor = function(position){
+    	switch(position)
+    	{
+    		case 1: return "gold";
+    		case 2: return "silver";
+    		case 3: return "brown";
+    		default:return "blue";
+    	}
+    };
+    var getLineOpacity = function(driver, noOfDrivers){
+    	if(driver.ticked)
+    		return 1;
+    	else
+    		return 0.1;
+    };
+	var svg = d3.select(".lineChart")
+				.attr("width",width+2*margin)
+				.attr("height",height+2*margin);
+	svg.append("text")
+	    .attr("class", "xlabel")
+	    .attr("text-anchor", "center")
+	    .attr("x", width/2)
+	    .attr("y", height+1.75*margin)
+		.attr("font-size", 12)
+	    .attr("opacity",1)
+	    .text("Races in the year");
+	svg.append("text")
+		.attr("class", "y label")
+		.attr("text-anchor", "end")
+		.attr("x", -height/2)
+		.attr("font-size", 12)
+		.attr("dy", ".75em")
+		.attr("transform", "rotate(-90)")
+		.text("Total Championship Points");
+	svg = svg.append("g")
+		.attr("transform","translate("+margin+","+(margin+height)+")")
+		.call(d3.axisLeft(y).ticks(10))
+		.append("g")
+		.call(d3.axisBottom(x).ticks(maxLength));
+	driverArray.forEach(function(driver,i){
+		for (var di = 1; di < driver.pointArray.length; di++) {
+			(function(di){
+				if(driver.pointArray[di]!=0)
+				{
+					var path = svg
+					.append("path")
+					.attr("d",lineFunction(driver.pointArray,di))
+					.attr("stroke", getLineColor(driver.position))
+					.attr("opacity", getLineOpacity(driver, driverArray.length))
+					.attr("stroke-width", 2)
+					.attr("fill", "none");
+				var totalLength = path.node().getTotalLength();
+				path.attr("stroke-dasharray", totalLength)
+					.attr("stroke-dashoffset", totalLength)
+					.transition()
+					.duration(timeUnit)
+					.delay(di*timeUnit)
+					.ease(d3.easeLinear)
+					.attr("stroke-dashoffset", 0);
+				}
+				svg.append("circle")
+					.attr("cx",x(di))
+					.attr("cy",-heightUnit*driver.pointArray[di])
+					.attr("r",3)
+					.attr("stroke","black")
+					.attr("opacity", getLineOpacity(driver, driverArray.length))
+					.attr("stroke-width",1)
+					.attr("fill","red")
+					.on("mouseover",function(){generateToolTip(di,driver.pointArray[di]);})
+					.on("mouseout",function(){removeToolTip()})
+					.attr("stroke-opacity",0)
+					.attr("fill-opacity",0)
+					.transition()
+					.duration(1)
+					.delay((di+1)*timeUnit)
+					.attr("stroke-opacity",1)
+					.attr("fill-opacity",1);
+				svg.append("text")
+			})(di);
+		}
+	});
 }
 </script>
 </body>
