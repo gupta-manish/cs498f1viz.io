@@ -1,0 +1,17 @@
+About the visualization
+
+The following visualization is about the Formula 1 World Driver Championships that have taken place over the years. 
+
+Each scene corresponds to a year from 1950 (when the F1 WDC started) to 2017.  Each scene contains a line chart and for every driver a line is present. The line shows the trend of the points accumulated by that driver over that championship. The top three drivers are drawn using the colors gold, silver and brown. Rest of the drivers have a shade of blue which is getting less opaque as we go down the ranks. The user can select the driver for which he wants to see the line chart. The line charts for other drivers will become transparent, highlighting the line charts of selected drivers. 
+
+Hybrid structure: - The visualization follows an interactive slideshow structure, where user starts from the essay and can click ‘Prev’ and ‘Next’ to move through the slides. The user can also select any slide to visualize its data.
+
+Scenes: - Each scene corresponds to a year from 1950 (when the F1 WDC started) to 2017.
+
+Annotations: - Annotations have been added in each scene to highlight the change in the championship leader (driver with the most points).  The number of annotations in a scene also give us a sense of how exciting that season was. For example, in 2010, there are 11 annotation, that means the championship leader changed 11 times in 19 races. 
+
+Parameters: - There are number of parameters used in this chart. Year, Axis Ranges, Drivers (keep changing year to year and can be selected from the driver list), Races etc. The state of the chart is controlled by the year and the drivers selected form the driver list. The user can change the year from the buttons provided on the top of the slideshow, and user can select the drivers from the driver list by ticking the checkboxes. As the user can see the checkboxes infront of driver name, the user can understand that he can select the drivers and hit ‘Play’ to see the selected drivers’ data.
+
+Triggers: - All the parameters are dependent on the year and the drivers for whom the data is shown. As the year changes, all the parameters are changed to display the data for that year. When the user clicks on the year button at the top, the user triggers a change in all the other parameters. User can also select the drivers for which he wants to see the data. When the user selects the drivers and hits play, the transparency of the unselected drivers increases
+
+

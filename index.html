@@ -120,6 +120,13 @@
 <div class="tabcontent">
   <h3 id="contentheading"></h3>
   <div id="essay">
+<p>The following visualization is about the Formula 1 World Driver Championships that have taken place over the years.</p>
+<p>Each scene corresponds to a year from 1950 (when the F1 WDC started) to 2017.&nbsp; Each scene contains a line chart and for every driver a line is present. The line shows the trend of the points accumulated by that driver over that championship. The top three drivers are drawn using the colors gold, silver and brown. Rest of the drivers blue colored line which is getting less opaque as we go down the ranks. The user can select the drivers for which he wants to see the line chart. The line charts for other drivers will become transparent, highlighting the line charts of selected drivers. Tooltips have been added, when a user hovers over the dots on the line, he gets more information about the driver, the points and the race at that dot.</p>
+<p>Hybrid structure: - The visualization follows an interactive slideshow structure, where user starts from the essay and can click &lsquo;Prev&rsquo; and &lsquo;Next&rsquo; to move through the slides. The user can also select any slide to visualize its data.</p>
+<p>Scenes: - Each scene corresponds to a year from 1950 (when the F1 WDC started) to 2017.</p>
+<p>Annotations: - Annotations have been added in each scene to highlight the change in the championship leader (driver with the most points).&nbsp; The number of annotations in a scene also give us a sense of how exciting that season was. For example, in 2010, there are 11 annotation, that means the championship leader changed 11 times in 19 races.</p>
+<p>Parameters: - There are number of parameters used in this chart. Year, Axis Ranges, Drivers (keep changing year to year and can be selected from the driver list), Races etc. The state of the chart is controlled by the year and the drivers selected form the driver list. The user can change the year from the buttons provided on the top of the slideshow, and user can select the drivers from the driver list by ticking the checkboxes. As the user can see the checkboxes in front of driver name, the user can understand that he can select the drivers and hit &lsquo;Play&rsquo; to see the selected drivers&rsquo; data.</p>
+<p>Triggers: - All the parameters are dependent on the year and the drivers for whom the data is shown. As the year changes, all the parameters are changed to display the data for that year. When the user clicks on the year button at the top, the user triggers a change in all the other parameters. User can also select the drivers for which he wants to see the data. When the user selects the drivers and hits play, he triggers a change in teh transparency of lines and the chart is replayed with the new colors. The transparency of the unselected drivers increases, which highlights the selected drivers. Hovering over the dots on the lines trigger an event to show the tooltips</p>
   </div>
   <svg class="lineChart"></svg>
   <div class="drivers" style="position: relative; display: inline-block; left: 0px; top: -35px;">
@@ -137,7 +144,7 @@
   <div id="tooltip"></div>
 </div>
 <script>
-var innerHTMLString = "<button class=\"tablinks\" id=\"essayButton\" onclick=\"openEssay(event)\">Essay</button>";
+var innerHTMLString = "<button class=\"tablinks\" id=\"essayButton\" onclick=\"openEssay(event)\">About the Visualization</button>";
 for (var i = 68; i > 0; i--) {
 	innerHTMLString = innerHTMLString + "<button class=\"tablinks\" id=\""+(2017-i+1)+"Button\" onclick=\"openYear(event,'"+(2017-i+1)+"')\">"+(2017-i+1)+"</button>";
 }
@@ -180,7 +187,7 @@ var openEssay = function(){
         tablinks[ti].className = tablinks[ti].className.replace(" active", "");
     }
     championshipYear = 0;
-    document.getElementById("contentheading").innerHTML="Essay";
+    document.getElementById("contentheading").innerHTML="About the Visualization";
     essay = document.getElementById("essay");
     essay.hidden = false;
     var svg = d3.select(".lineChart");
@@ -251,7 +258,7 @@ var openYear = function(evt, year = championshipYear.toString()) {
 	timeUnit = 500;
 	barWidth = width/maxLength;
 	heightUnit = height/dataMax;
-	margin = 40;
+	margin = 50;
 	var x = d3.scalePoint().domain(getIndexArray(maxLength)).range([0,width]);
 	var y = d3.scaleLinear().domain([0,dataMax]).range([0,-height]);
 	var lineFunction = function(data,di){
@@ -367,7 +374,7 @@ var openYear = function(evt, year = championshipYear.toString()) {
 				if(driver.isLeaderArray[di] && !driver.isLeaderArray[di-1]){
 					stext = svg.append("text")
 						.attr("x",x(di)-5)
-						.attr("y",-heightUnit*driver.pointArray[di]-100)
+						.attr("y",-heightUnit*driver.pointArray[di]-50)
 						.attr("text-anchor", "end")
 						.attr("fill", "red")
 						.attr("font-size",11)
@@ -391,8 +398,8 @@ var openYear = function(evt, year = championshipYear.toString()) {
 						.attr("width",2)
 						.attr("stroke-wdith",0)
 						.attr("x",x(di))
-						.attr("y",-heightUnit*driver.pointArray[di]-90)
-						.attr("height",90);
+						.attr("y",-heightUnit*driver.pointArray[di]-40)
+						.attr("height",40);
 					arrow.attr("stroke-opacity",0)
 						.attr("fill-opacity",0)
 						.transition()
