@@ -145,8 +145,8 @@
 </div>
 <script>
 var innerHTMLString = "<button class=\"tablinks\" id=\"essayButton\" onclick=\"openEssay(event)\">About the Visualization</button>";
-for (var i = 68; i > 0; i--) {
-	innerHTMLString = innerHTMLString + "<button class=\"tablinks\" id=\""+(2017-i+1)+"Button\" onclick=\"openYear(event,'"+(2017-i+1)+"')\">"+(2017-i+1)+"</button>";
+for (var i = 71; i > 0; i--) {
+	innerHTMLString = innerHTMLString + "<button class=\"tablinks\" id=\""+(2020-i+1)+"Button\" onclick=\"openYear(event,'"+(2020-i+1)+"')\">"+(2020-i+1)+"</button>";
 }
 $(".tab").append(innerHTMLString);
 var championshipYear = 0;
@@ -172,7 +172,7 @@ var prevPage = function(){
 	}
 }
 var nextPage = function(){
-	if(championshipYear != 2017)
+	if(championshipYear != 2020)
 	{
 		if(championshipYear == 0)
 			document.getElementById(1950+"Button").click();
